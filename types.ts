@@ -1,0 +1,1 @@
+// Types no longer needed in vanilla index.html approach

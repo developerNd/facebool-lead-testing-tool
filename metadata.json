@@ -1,0 +1,5 @@
+{
+  "name": "Facebook Lead Ads Testing Tool",
+  "description": "A professional utility for developers to test Facebook Lead Ads integrations by creating test leads and verifying data retrieval through the Facebook Graph API.",
+  "requestFramePermissions": []
+}
