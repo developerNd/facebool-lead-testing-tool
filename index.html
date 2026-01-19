@@ -14,18 +14,9 @@
         .json-pre::-webkit-scrollbar { width: 6px; height: 6px; }
         .json-pre::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-    "react/": "https://esm.sh/react@^19.2.3/"
-  }
-}
-</script>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-4 md:p-8">
-    <div class="max-w-4xl mx-auto">
+    <div class="max-w-5xl mx-auto">
         <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
             <!-- Header -->
             <div class="bg-blue-600 p-8 text-white">
@@ -35,7 +26,7 @@
                     </div>
                     <div>
                         <h1 class="text-3xl font-bold tracking-tight">Facebook Lead Ads Testing Tool</h1>
-                        <p class="text-blue-100 mt-1 opacity-90 text-sm md:text-base">Simulate and verify your Lead Ads integration in seconds</p>
+                        <p class="text-blue-100 mt-1 opacity-90 text-sm md:text-base">Create, view, and delete test leads with ease</p>
                     </div>
                 </div>
             </div>
@@ -50,7 +41,7 @@
                             <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-sm text-blue-800">
                                 <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>Page Token with leads_retrieval</li>
                                 <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>Page role Advertiser or higher</li>
-                                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>No existing test leads for this form</li>
+                                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>DELETE permission for removing leads</li>
                                 <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>Form should not be in production</li>
                             </ul>
                         </div>
@@ -88,10 +79,18 @@
                         <textarea id="accessToken" placeholder="Paste your long-lived or session Page Access Token here..." rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm shadow-sm outline-none transition-all"></textarea>
                     </div>
 
-                    <button id="createBtn" class="w-full py-4 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-xl active:scale-[0.98] disabled:bg-gray-200 disabled:text-gray-400 disabled:shadow-none disabled:cursor-not-allowed">
-                        <i data-lucide="send" class="w-6 h-6"></i>
-                        <span id="btnText">Create Test Lead</span>
-                    </button>
+                    <!-- Action Buttons -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <button id="createBtn" class="py-4 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-xl active:scale-[0.98] disabled:bg-gray-200 disabled:text-gray-400 disabled:shadow-none disabled:cursor-not-allowed">
+                            <i data-lucide="send" class="w-6 h-6"></i>
+                            <span id="btnText">Create Test Lead</span>
+                        </button>
+
+                        <button id="listLeadsBtn" class="py-4 px-6 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-xl active:scale-[0.98] disabled:bg-gray-200 disabled:text-gray-400 disabled:shadow-none disabled:cursor-not-allowed">
+                            <i data-lucide="list" class="w-6 h-6"></i>
+                            <span id="listBtnText">View All Leads</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Error Feedback -->
@@ -102,6 +101,19 @@
                             <div class="flex-1">
                                 <h3 class="font-bold text-red-800">API Error</h3>
                                 <p id="errorMessage" class="text-red-700 text-sm mt-1 leading-relaxed"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Success Feedback -->
+                <div id="successBox" class="hidden">
+                    <div class="bg-green-50 border-l-4 border-green-500 p-5 rounded-r-lg">
+                        <div class="flex items-start gap-4">
+                            <i data-lucide="check-circle" class="text-green-600 flex-shrink-0 w-6 h-6"></i>
+                            <div class="flex-1">
+                                <h3 class="font-bold text-green-800">Success</h3>
+                                <p id="successMessage" class="text-green-700 text-sm mt-1 leading-relaxed"></p>
                             </div>
                         </div>
                     </div>
@@ -140,6 +152,35 @@
                     </div>
                 </div>
 
+                <!-- Leads List Section -->
+                <div id="leadsListBox" class="hidden">
+                    <div class="border-l-4 border-purple-500 p-6 rounded-r-lg shadow-sm bg-purple-50">
+                        <div class="flex items-start gap-4">
+                            <div class="p-2 rounded-full bg-purple-100">
+                                <i data-lucide="database" class="w-6 h-6 text-purple-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-bold text-purple-800">All Leads from Form</h3>
+                                    <span id="leadsCount" class="px-3 py-1 text-xs font-bold rounded-full uppercase tracking-wider bg-purple-200 text-purple-800"></span>
+                                </div>
+                                
+                                <div id="leadsContainer" class="space-y-3"></div>
+                                
+                                <div id="paginationBox" class="mt-6 flex items-center justify-between hidden">
+                                    <button id="prevBtn" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium disabled:bg-gray-300 disabled:cursor-not-allowed transition-all">
+                                        Previous
+                                    </button>
+                                    <span id="pageInfo" class="text-sm text-purple-700 font-medium"></span>
+                                    <button id="nextBtn" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium disabled:bg-gray-300 disabled:cursor-not-allowed transition-all">
+                                        Next
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Documentation -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-gray-100">
                     <section>
@@ -162,11 +203,18 @@
                             <i data-lucide="code" class="w-5 h-5 text-blue-500"></i>
                             Endpoint Reference
                         </h3>
-                        <div class="bg-slate-900 text-slate-300 p-6 rounded-2xl font-mono text-[11px] leading-relaxed">
-                            <div class="mb-2 text-slate-500 text-[10px] uppercase tracking-widest font-bold">Meta Graph Request</div>
-                            <p><span class="text-pink-400 font-bold">POST</span> /v20.0/{FORM_ID}/test_leads</p>
-                            <div class="pt-2 mt-2 border-t border-slate-800 opacity-60">
-                                curl -X POST "https://graph.facebook.com/v20.0/FORM_ID/test_leads?access_token=TOKEN"
+                        <div class="bg-slate-900 text-slate-300 p-6 rounded-2xl font-mono text-[11px] leading-relaxed space-y-3">
+                            <div>
+                                <div class="text-slate-500 text-[10px] uppercase tracking-widest font-bold mb-1">Create Test Lead</div>
+                                <p><span class="text-pink-400 font-bold">POST</span> /v20.0/{FORM_ID}/test_leads</p>
+                            </div>
+                            <div class="border-t border-slate-800 pt-3">
+                                <div class="text-slate-500 text-[10px] uppercase tracking-widest font-bold mb-1">List All Leads</div>
+                                <p><span class="text-green-400 font-bold">GET</span> /v20.0/{FORM_ID}/leads</p>
+                            </div>
+                            <div class="border-t border-slate-800 pt-3">
+                                <div class="text-slate-500 text-[10px] uppercase tracking-widest font-bold mb-1">Delete Lead</div>
+                                <p><span class="text-red-400 font-bold">DELETE</span> /v20.0/{LEAD_ID}</p>
                             </div>
                         </div>
                     </section>
@@ -176,8 +224,33 @@
             <!-- Footer -->
             <div class="bg-gray-50 border-t border-gray-100 p-6 text-center">
                 <p class="text-[10px] text-gray-400 font-medium tracking-wide">
-                    Meta Marketing API Development Utility • v2.1.0
+                    Meta Marketing API Development Utility • v3.0.0
                 </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-[scale-in_0.2s_ease-out]">
+            <div class="flex items-start gap-4 mb-6">
+                <div class="bg-red-100 p-3 rounded-full">
+                    <i data-lucide="trash-2" class="w-6 h-6 text-red-600"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-xl font-bold text-gray-800">Delete Lead?</h3>
+                    <p class="text-sm text-gray-600 mt-2">Are you sure you want to delete this lead? This action cannot be undone.</p>
+                    <p class="text-xs text-gray-500 mt-3 font-mono bg-gray-50 p-2 rounded border border-gray-200" id="deleteLeadId"></p>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button id="cancelDelete" class="flex-1 px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-semibold transition-all">
+                    Cancel
+                </button>
+                <button id="confirmDelete" class="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    Delete
+                </button>
             </div>
         </div>
     </div>
@@ -189,8 +262,12 @@
         const versionSelect = document.getElementById('apiVersion');
         const createBtn = document.getElementById('createBtn');
         const btnText = document.getElementById('btnText');
+        const listLeadsBtn = document.getElementById('listLeadsBtn');
+        const listBtnText = document.getElementById('listBtnText');
         const errorBox = document.getElementById('errorBox');
         const errorMessage = document.getElementById('errorMessage');
+        const successBox = document.getElementById('successBox');
+        const successMessage = document.getElementById('successMessage');
         const responseBox = document.getElementById('responseBox');
         const responseStatus = document.getElementById('responseStatus');
         const statusIcon = document.getElementById('statusIcon');
@@ -202,8 +279,21 @@
         const detailsAction = document.getElementById('detailsAction');
         const fetchDetailsBtn = document.getElementById('fetchDetailsBtn');
         const leadIdBadge = document.getElementById('leadIdBadge');
+        const leadsListBox = document.getElementById('leadsListBox');
+        const leadsContainer = document.getElementById('leadsContainer');
+        const leadsCount = document.getElementById('leadsCount');
+        const paginationBox = document.getElementById('paginationBox');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const pageInfo = document.getElementById('pageInfo');
+        const deleteModal = document.getElementById('deleteModal');
+        const deleteLeadId = document.getElementById('deleteLeadId');
+        const cancelDelete = document.getElementById('cancelDelete');
+        const confirmDelete = document.getElementById('confirmDelete');
 
         let lastResponseData = null;
+        let currentPagination = null;
+        let leadToDelete = null;
 
         // Initialize Lucide Icons
         lucide.createIcons();
@@ -212,21 +302,26 @@
         const validate = () => {
             const isValid = formIdInput.value.trim() !== '' && tokenInput.value.trim() !== '';
             createBtn.disabled = !isValid;
+            listLeadsBtn.disabled = !isValid;
         };
 
         formIdInput.addEventListener('input', validate);
         tokenInput.addEventListener('input', validate);
 
         // Core API Logic
-        const setUIState = (loading) => {
+        const setUIState = (loading, buttonId = 'create') => {
+            const btn = buttonId === 'create' ? createBtn : listLeadsBtn;
+            const text = buttonId === 'create' ? btnText : listBtnText;
+            const icon = btn.querySelector('svg, i');
+            
             if (loading) {
-                createBtn.disabled = true;
-                btnText.textContent = 'Processing...';
-                createBtn.querySelector('i').classList.add('animate-spin');
+                btn.disabled = true;
+                text.textContent = buttonId === 'create' ? 'Processing...' : 'Loading...';
+                if (icon) icon.classList.add('animate-spin');
             } else {
-                createBtn.disabled = false;
-                btnText.textContent = 'Create Test Lead';
-                createBtn.querySelector('i').classList.remove('animate-spin');
+                btn.disabled = false;
+                text.textContent = buttonId === 'create' ? 'Create Test Lead' : 'View All Leads';
+                if (icon) icon.classList.remove('animate-spin');
                 validate();
             }
         };
@@ -236,9 +331,8 @@
             const token = tokenInput.value.trim();
             const version = versionSelect.value;
 
-            setUIState(true);
-            errorBox.classList.add('hidden');
-            responseBox.classList.add('hidden');
+            setUIState(true, 'create');
+            hideAllMessages();
 
             try {
                 const url = `https://graph.facebook.com/${version}/${formId}/test_leads`;
@@ -261,17 +355,123 @@
             } catch (err) {
                 showError(err.message || 'An unexpected error occurred');
             } finally {
-                setUIState(false);
+                setUIState(false, 'create');
             }
+        };
+
+        const listAllLeads = async (url = null) => {
+            const formId = formIdInput.value.trim();
+            const token = tokenInput.value.trim();
+            const version = versionSelect.value;
+
+            setUIState(true, 'list');
+            hideAllMessages();
+
+            try {
+                const endpoint = url || `https://graph.facebook.com/${version}/${formId}/leads?access_token=${token}`;
+                const res = await fetch(endpoint);
+                const data = await res.json();
+
+                if (res.ok) {
+                    displayLeadsList(data);
+                } else {
+                    const msg = data.error?.message || 'Failed to retrieve leads';
+                    showError(msg);
+                    leadsListBox.classList.add('hidden');
+                }
+            } catch (err) {
+                showError(err.message || 'An unexpected error occurred');
+                leadsListBox.classList.add('hidden');
+            } finally {
+                setUIState(false, 'list');
+            }
+        };
+
+        const displayLeadsList = (data) => {
+            leadsListBox.classList.remove('hidden');
+            leadsContainer.innerHTML = '';
+
+            const leads = data.data || [];
+            leadsCount.textContent = `${leads.length} Lead${leads.length !== 1 ? 's' : ''}`;
+
+            if (leads.length === 0) {
+                leadsContainer.innerHTML = `
+                    <div class="bg-white rounded-lg p-6 text-center border border-purple-200">
+                        <i data-lucide="inbox" class="w-12 h-12 text-purple-300 mx-auto mb-3"></i>
+                        <p class="text-purple-600 font-medium">No leads found for this form</p>
+                        <p class="text-sm text-purple-500 mt-1">Create a test lead to get started</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                paginationBox.classList.add('hidden');
+                leadsListBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+
+            leads.forEach((lead, index) => {
+                const leadCard = document.createElement('div');
+                leadCard.className = 'bg-white rounded-lg p-4 border border-purple-200 hover:border-purple-400 transition-all';
+                
+                const cardContent = document.createElement('div');
+                cardContent.className = 'flex items-start justify-between';
+                
+                cardContent.innerHTML = `
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-xs font-bold text-purple-600 bg-purple-100 px-2 py-1 rounded">#${index + 1}</span>
+                            <span class="text-xs text-gray-500 font-mono">${lead.id}</span>
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            <span class="font-semibold">Created:</span> ${new Date(lead.created_time).toLocaleString()}
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="view-btn bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-xs font-medium transition-all flex items-center gap-1">
+                            <i data-lucide="eye" class="w-3 h-3"></i> View
+                        </button>
+                        <button class="delete-btn bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-xs font-medium transition-all flex items-center gap-1">
+                            <i data-lucide="trash-2" class="w-3 h-3"></i> Delete
+                        </button>
+                    </div>
+                `;
+                
+                leadCard.appendChild(cardContent);
+                
+                // Add event listeners
+                const viewBtn = cardContent.querySelector('.view-btn');
+                const deleteBtn = cardContent.querySelector('.delete-btn');
+                
+                viewBtn.addEventListener('click', () => fetchLeadDetails(lead.id));
+                deleteBtn.addEventListener('click', () => showDeleteModal(lead.id));
+                
+                leadsContainer.appendChild(leadCard);
+            });
+
+            lucide.createIcons();
+
+            // Handle pagination
+            if (data.paging) {
+                currentPagination = data.paging;
+                paginationBox.classList.remove('hidden');
+                prevBtn.disabled = !data.paging.previous;
+                nextBtn.disabled = !data.paging.next;
+                pageInfo.textContent = `Showing ${leads.length} leads`;
+            } else {
+                paginationBox.classList.add('hidden');
+            }
+
+            leadsListBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
         };
 
         const fetchLeadDetails = async (leadId) => {
             const version = versionSelect.value;
             const token = tokenInput.value.trim();
             
-            setUIState(true);
+            setUIState(true, 'create');
+            hideAllMessages();
+            
             try {
-                const url = `https://graph.facebook.com/${version}/${leadId}?fields=field_data,ad_name,campaign_name&access_token=${token}`;
+                const url = `https://graph.facebook.com/${version}/${leadId}?fields=id,created_time,field_data,ad_name,campaign_name,form_id,is_organic&access_token=${token}`;
                 const res = await fetch(url);
                 const data = await res.json();
                 
@@ -280,15 +480,74 @@
             } catch (err) {
                 showError(err.message);
             } finally {
-                setUIState(false);
+                setUIState(false, 'create');
             }
         };
 
+        const showDeleteModal = (leadId) => {
+            leadToDelete = leadId;
+            deleteLeadId.textContent = `Lead ID: ${leadId}`;
+            deleteModal.classList.remove('hidden');
+            lucide.createIcons();
+        };
+
+        const hideDeleteModal = () => {
+            deleteModal.classList.add('hidden');
+            leadToDelete = null;
+        };
+
+        const deleteLead = async () => {
+            if (!leadToDelete) return;
+
+            const version = versionSelect.value;
+            const token = tokenInput.value.trim();
+            
+            hideDeleteModal();
+            setUIState(true, 'list');
+            hideAllMessages();
+
+            try {
+                const url = `https://graph.facebook.com/${version}/${leadToDelete}?access_token=${token}`;
+                const res = await fetch(url, {
+                    method: 'DELETE'
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    showSuccess(`Lead ${leadToDelete} deleted successfully!`);
+                    // Refresh the leads list
+                    setTimeout(() => listAllLeads(), 1500);
+                } else {
+                    const msg = data.error?.message || 'Failed to delete lead';
+                    showError(msg);
+                }
+            } catch (err) {
+                showError(err.message || 'An unexpected error occurred while deleting');
+            } finally {
+                setUIState(false, 'list');
+            }
+        };
+
+
+
         // UI Updates
+        const hideAllMessages = () => {
+            errorBox.classList.add('hidden');
+            successBox.classList.add('hidden');
+            responseBox.classList.add('hidden');
+        };
+
         const showError = (msg) => {
             errorMessage.textContent = msg;
             errorBox.classList.remove('hidden');
             errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        };
+
+        const showSuccess = (msg) => {
+            successMessage.textContent = msg;
+            successBox.classList.remove('hidden');
+            successBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
         };
 
         const showResponse = (success, data, title, statusLabel) => {
@@ -316,7 +575,7 @@
             jsonDisplay.textContent = JSON.stringify(data, null, 2);
             
             // Check for lead ID to show fetch details button
-            if (success && data.id) {
+            if (success && data.id && !data.field_data) {
                 detailsAction.classList.remove('hidden');
                 leadIdBadge.textContent = `ID: ${data.id}`;
                 fetchDetailsBtn.onclick = () => fetchLeadDetails(data.id);
@@ -330,6 +589,28 @@
 
         // Event Listeners
         createBtn.addEventListener('click', createTestLead);
+        listLeadsBtn.addEventListener('click', () => listAllLeads());
+        
+        prevBtn.addEventListener('click', () => {
+            if (currentPagination && currentPagination.previous) {
+                listAllLeads(currentPagination.previous);
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentPagination && currentPagination.next) {
+                listAllLeads(currentPagination.next);
+            }
+        });
+        
+        cancelDelete.addEventListener('click', hideDeleteModal);
+        confirmDelete.addEventListener('click', deleteLead);
+
+        deleteModal.addEventListener('click', (e) => {
+            if (e.target === deleteModal) {
+                hideDeleteModal();
+            }
+        });
         
         copyBtn.addEventListener('click', () => {
             if (jsonDisplay.textContent) {
